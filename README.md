@@ -52,7 +52,7 @@ All data is stored in row-major format:
 #define MAT_AT(m, i, j) ((m)->data[(i) * (m)->stride + (j)])
 ```
 
-![Row-Major](assets/row-major.png)
+![](assets/row-major.png)
 
 This enables:
 
