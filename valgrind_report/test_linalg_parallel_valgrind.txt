@@ -1,0 +1,15 @@
+==64605== Memcheck, a memory error detector
+==64605== Copyright (C) 2002-2022, and GNU GPL'd, by Julian Seward et al.
+==64605== Using Valgrind-3.22.0 and LibVEX; rerun with -h for copyright info
+==64605== Command: ./build/test_linalg_parallel
+==64605== Parent PID: 64603
+==64605== 
+==64605== 
+==64605== HEAP SUMMARY:
+==64605==     in use at exit: 0 bytes in 0 blocks
+==64605==   total heap usage: 13 allocs, 13 frees, 1,816 bytes allocated
+==64605== 
+==64605== All heap blocks were freed -- no leaks are possible
+==64605== 
+==64605== For lists of detected and suppressed errors, rerun with: -s
+==64605== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
