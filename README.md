@@ -78,6 +78,26 @@ run:
 ./build/test_matvec
 ```
 
+## Test Memory Leak
+
+To use this feature, you need to install valgrind:
+
+```bash
+sudo apt-get install valgrind
+```
+
+You need to give permission to run the script:
+
+```bash
+chmod +x run_valgrind.sh
+```
+
+Then run:
+
+```bash
+./run_valgrind.sh test_matrix
+```
+
 ## Goals
 - Understand how neural networks work at the lowest level
 - Implement backpropagation manually
