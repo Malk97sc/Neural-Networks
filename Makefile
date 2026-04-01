@@ -1,11 +1,12 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -O2 -Iinclude
+CFLAGS = -Wall -Wextra -O2 -Iinclude -pthread -g
 
 SRC_DIR = src
+PAR_DIR = src/parallel
 BUILD_DIR = build
 TEST_DIR = tests
 
-SRC = $(SRC_DIR)/matrix.c $(SRC_DIR)/linalg.c
+SRC = $(wildcard $(SRC_DIR)/*.c) $(wildcard $(PAR_DIR)/*.c)
 OBJ = $(SRC:.c=.o)
 
 TEST_SRC = $(wildcard $(TEST_DIR)/*.c)
@@ -26,11 +27,15 @@ $(BUILD_DIR)/%: $(TEST_DIR)/%.c $(OBJ) | $(BUILD_DIR)
 $(SRC_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
+$(PAR_DIR)/%.o: $(PAR_DIR)/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
 clean:
 	rm -rf $(BUILD_DIR)
 	rm -f $(SRC_DIR)/*.o
+	rm -f $(PAR_DIR)/*.o
 
 .PHONY: all test clean
