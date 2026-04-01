@@ -3,6 +3,7 @@
 #include <assert.h>
 
 #include "linalg.h"
+#include "parallel.h"
 
 float vec_dot(const float *__restrict a, const float * __restrict b, int n){
     assert(a != NULL && b != NULL);
@@ -25,6 +26,7 @@ void vec_add(const float * __restrict a, const float * __restrict b, float * __r
         out[i] = a[i] + b[i];
     }
 }
+
 void vec_scale(float *x, float alpha, int n){
     assert(x != NULL);
     assert(n >= 0);
@@ -46,9 +48,7 @@ void matvec(const Matrix *A, const float *x, float *y){
 }
 
 void matvec_parallel(const Matrix *A, const float *x, float *y, int n_threads){
-    (void) n_threads;
-
-    matvec(A, x, y); //for now 
+    matvec_parallel_impl(A, x, y, n_threads);
 }
 
 /*3. (matrix-matrix) */
@@ -76,9 +76,7 @@ void matmul(const Matrix *A, const Matrix *B, Matrix *C){
 }
 
 void matmul_parallel(const Matrix *A, const Matrix *B, Matrix *C, int n_threads){
-    (void)n_threads;
-
-    matmul(A, B, C); //for now
+    matmul_parallel_impl(A, B, C, n_threads);
 }
 
 /* transformations */
@@ -107,9 +105,7 @@ void mat_add_rowwise(Matrix *A, const float *b){
 }
 
 void mat_add_rowwise_parallel(Matrix *A, const float *b, int n_threads){
-    (void)n_threads;
-
-    mat_add_rowwise(A, b); //for now
+    mat_add_rowwise_parallel_impl(A, b, n_threads);
 }
 
 /* element-wise ops */
@@ -126,7 +122,5 @@ void mat_apply(Matrix *A, float (*func)(float)){
 }
 
 void mat_apply_parallel(Matrix *A, float (*func)(float), int n_threads){
-    (void)n_threads;
-
-    mat_apply(A, func); //for now
+    mat_apply_parallel_impl(A, func, n_threads);
 }
