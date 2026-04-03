@@ -4,6 +4,7 @@
 
 #include "linalg.h"
 #include "parallel.h"
+#include "runtime.h"
 
 float vec_dot(const float *__restrict a, const float * __restrict b, int n){
     assert(a != NULL && b != NULL);
@@ -39,6 +40,13 @@ void matvec(const Matrix *A, const float *x, float *y){
     assert(A && x && y);
     assert(A->cols >= 0 && A->rows >= 0);
 
+    if(should_parallelize_matvec(A->rows, A->cols)){
+        printf("[matvec] parallel path\n");
+        const RuntimeConfig *cfg = runtime_get();
+        matvec_parallel_impl(A, x, y, cfg->n_threads);
+        return;
+    }
+
     const float *row = NULL;
 
     for(int i=0; i < A->rows; i++){
@@ -55,6 +63,13 @@ void matvec_parallel(const Matrix *A, const float *x, float *y, int n_threads){
 void matmul(const Matrix *A, const Matrix *B, Matrix *C){
     assert(A && B && C);
     assert((A->cols == B->rows) && (C->rows == A->rows) && (C->cols == B->cols));
+
+    if(should_parallelize_matmul(A->rows, A->cols, B->cols)){
+        printf("[matmul] parallel path\n");
+        const RuntimeConfig *cfg = runtime_get();
+        matmul_parallel_impl(A, B, C, cfg->n_threads);
+        return;
+    }
 
     int rowsA, colsA, colsB;
     float sum = 0.0f;
@@ -94,6 +109,13 @@ void mat_transpose(const Matrix *A, Matrix *AT){
 /* Bias ops */
 void mat_add_rowwise(Matrix *A, const float *b){
     assert(A && b);
+
+    if(should_parallelize_elementwise_add(A->rows, A->cols)){
+        const RuntimeConfig *cfg = runtime_get();
+        mat_add_rowwise_parallel_impl(A, b, cfg->n_threads);
+        return;
+    }
+
     float *row = NULL;
 
     for(int i=0; i < A->rows; i++){
@@ -111,6 +133,13 @@ void mat_add_rowwise_parallel(Matrix *A, const float *b, int n_threads){
 /* element-wise ops */
 void mat_apply(Matrix *A, float (*func)(float)){
     assert(A && func);
+
+    if(should_parallelize_elementwise(A->rows * A->cols)){
+        const RuntimeConfig *cfg = runtime_get();
+        mat_apply_parallel_impl(A, func, cfg->n_threads);
+        return;
+    }
+
     float *row = NULL;
 
     for(int i=0; i < A->rows; i++){

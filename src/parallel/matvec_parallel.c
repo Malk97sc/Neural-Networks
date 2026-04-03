@@ -1,8 +1,9 @@
-#include <pthread.h>
 #include <assert.h>
 
 #include "linalg.h"
 #include "parallel.h"
+#include "runtime.h"
+#include "thread_pool.h"
 
 typedef struct {
     const Matrix *A;
@@ -12,11 +13,12 @@ typedef struct {
     int end_row;
 } MatVecTask;
 
-static void *worker(void *arg){
+static void worker(void *arg){
     MatVecTask *task = (MatVecTask *)arg;
-    const float *x, *row;
-    float *y;
     const Matrix *A;
+    const float *x;
+    float *y;
+    const float *row;
 
     A = task->A;
     x = task->x;
@@ -26,8 +28,6 @@ static void *worker(void *arg){
         row = &A->data[i * A->stride];
         y[i] = vec_dot(row, x, A->cols);
     }
-
-    return NULL;
 }
 
 void matvec_parallel_impl(const Matrix *A, const float *x, float *y, int n_threads){
@@ -38,24 +38,24 @@ void matvec_parallel_impl(const Matrix *A, const float *x, float *y, int n_threa
         matvec(A, x, y);
         return;
     }
-    
+
     int rows, chunk;
-    pthread_t threads[n_threads];
     MatVecTask tasks[n_threads];
+    void *args[n_threads];
 
     rows = A->rows;
-
     chunk = rows / n_threads;
 
-    for(int t=0; t < n_threads; t++){
+    for(int t = 0; t < n_threads; t++){
         tasks[t].A = A;
         tasks[t].x = x;
         tasks[t].y = y;
         tasks[t].start_row = chunk * t;
-        tasks[t].end_row = (t == n_threads - 1) ? rows : chunk * (t+1);
-
-        pthread_create(&threads[t], NULL, worker, &tasks[t]);
+        tasks[t].end_row = (t == n_threads - 1) ? rows : chunk * (t + 1);
+        args[t] = &tasks[t];
     }
 
-    for(int t = 0; t < n_threads; t++) pthread_join(threads[t], NULL);
+    const RuntimeConfig *cfg = runtime_get();
+    thread_pool_submit(cfg->pool, worker, args, n_threads);
+    thread_pool_wait(cfg->pool);
 }

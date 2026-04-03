@@ -5,6 +5,7 @@
 #include "matrix.h"
 #include "linalg.h"
 #include "parallel.h"
+#include "runtime.h"
 
 #define EPS 1e-5f
 
@@ -16,6 +17,8 @@ void test_bias_parallel();
 void test_apply_parallel();
 
 int main(){
+    runtime_init(4);
+
     printf("Running parallel tests...\n");
 
     test_matvec_parallel();
@@ -25,6 +28,7 @@ int main(){
 
     printf("All parallel tests passed.\n");
 
+    runtime_destroy();
     return 0;
 }
 
