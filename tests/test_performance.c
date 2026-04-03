@@ -63,14 +63,14 @@ void test_matvec_runtime(int rows, int cols){
             MAT_AT(&A, i, j) = 1.0f;
     }
 
-    /* --- Sequential --- */
+    //Sequential
     double t0 = now();
 
-    matvec(&A, x, y_seq);  // puede usar runtime → lo forzamos abajo
+    matvec(&A, x, y_seq);
 
     double t1 = now();
 
-    /* --- Parallel (forzado) --- */
+    //Parallel
     const RuntimeConfig *cfg = runtime_get();
 
     double t2 = now();
@@ -79,7 +79,7 @@ void test_matvec_runtime(int rows, int cols){
 
     double t3 = now();
 
-    /* --- Correctness --- */
+    //Correctness
     for (int i = 0; i < rows; i++)
     {
         assert(float_eq(y_seq[i], (float)cols));
@@ -111,14 +111,14 @@ void test_matmul_runtime(int m, int n, int p){
     mat_fill(&A, 1.0f);
     mat_fill(&B, 1.0f);
 
-    /* --- Sequential --- */
+    //Sequential
     double t0 = now();
 
     matmul(&A, &B, &C_seq);
 
     double t1 = now();
 
-    /* --- Parallel --- */
+    //Parallel
     const RuntimeConfig *cfg = runtime_get();
 
     double t2 = now();
@@ -127,7 +127,7 @@ void test_matmul_runtime(int m, int n, int p){
 
     double t3 = now();
 
-    /* --- Correctness --- */
+    //Correctness
     for (int i = 0; i < m * p; i++)
     {
         assert(float_eq(C_seq.data[i], (float)n));
