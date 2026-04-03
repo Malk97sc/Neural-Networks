@@ -28,7 +28,8 @@ memory layout, numerical computation, and parallel execution.
 - [x] Row partitioning strategy using pthreads
 - [x] Parallel matrix-vector multiplication & matrix-matrix multiplication
 - [x] Parallel batch operations
-- [ ] Speedup benchmarking (Sequential vs Parallel)
+- [x] Persistent Thread Pool (Minimalist BLAS-style)
+- [x] Speedup benchmarking (Sequential vs Parallel tool)
 
 ### Phase 3: NN Infrastructure
 - [ ] Activation functions & Derivatives
@@ -57,9 +58,9 @@ memory layout, numerical computation, and parallel execution.
 - [ ] 7.2 Gradient reduction buffers and synchronization
 
 ### Phase 8 & 9: Performance Engineering
-- [ ] 8.1 Persistent Thread Pool implementation
-- [ ] 8.2 Task queue & Worker synchronization
-- [ ] 9.1 Cache-aware optimization (Loop Tiling)
+- [x] Persistent Thread Pool implementation (eliminates pthread overhead)
+- [x] Worker synchronization via Condition Variables
+- [ ] 9.1 Cache-aware optimization (Loop Tiling / Blocking)
 - [ ] 9.2 Memory alignment & Branch avoidance
 
 ### Phase 10: Robustness & Tooling
@@ -91,15 +92,19 @@ Neural-Networks-in-C
 ├── include/
 │   ├── matrix.h
 │   ├── parallel.h
-│   └── linalg.h
+│   ├── linalg.h
+│   ├── runtime.h
+│   └── thread_pool.h
 ├── src/
 │   ├── parallel/
-│   │   ├── add_rowwise.c
-│   │   ├── apply.c
-│   │   ├── matmul.c
-│   │   └── matvec.c
+│   │   ├── mat_add_rowwise_parallel.c
+│   │   ├── mat_apply_parallel.c
+│   │   ├── matmul_parallel.c
+│   │   └── matvec_parallel.c
 │   ├── matrix.c
-│   └── linalg.c
+│   ├── linalg.c
+│   ├── runtime.c
+│   └── thread_pool.c
 ├── tests/
 │   └── test_*.c
 ├── build/ # compiled binaries
@@ -108,23 +113,9 @@ Neural-Networks-in-C
 └── Makefile
 ```
 
-## Core Components
+## Performance Note: Thread Pool
 
-### Matrix Representation
-
-All data is stored in row-major format:
-
-```c
-#define MAT_AT(m, i, j) ((m)->data[(i) * (m)->stride + (j)])
-```
-
-![](assets/row-major.png)
-
-This enables:
-
-- Cache-friendly access patterns
-- Predictable memory layout
-- Efficient parallelization
+The project uses a persistent Thread Pool (BLAS-style) to manage parallel tasks. Unlike a naive approach where threads are created and joined on every operation, this implementation spawns workers once at startup (`runtime_init`) and signals work using condition variables. This eliminates the significant overhead of `pthread_create`/`pthread_join` syscalls, making small-to-medium matrix operations much more efficient.
 
 ## Build
 
@@ -142,6 +133,7 @@ run:
 ```bash
 ./build/test_matmul
 ./build/test_matvec
+./build/test_performance
 ```
 
 ## Test Memory Leak
@@ -161,5 +153,5 @@ chmod +x run_valgrind.sh
 Then run:
 
 ```bash
-./run_valgrind.sh test_matrix
+./run_valgrind.sh test_runtime
 ```

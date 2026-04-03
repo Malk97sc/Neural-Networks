@@ -1,17 +1,18 @@
-#include <pthread.h>
 #include <assert.h>
 
 #include "parallel.h"
 #include "linalg.h"
+#include "runtime.h"
+#include "thread_pool.h"
 
-typedef struct{
+typedef struct {
     Matrix *A;
     float (*func)(float);
     int start_row;
     int end_row;
 } ApplyTask;
 
-static void *worker(void *arg){
+static void worker(void *arg){
     ApplyTask *task = (ApplyTask *)arg;
     Matrix *A;
     float (*func)(float);
@@ -22,12 +23,10 @@ static void *worker(void *arg){
 
     for(int i = task->start_row; i < task->end_row; i++){
         row = &A->data[i * A->stride];
-        for(int j=0; j < A->cols; j++){
+        for(int j = 0; j < A->cols; j++){
             row[j] = func(row[j]);
-        }
+        }            
     }
-
-    return NULL;
 }
 
 void mat_apply_parallel_impl(Matrix *A, float (*func)(float), int n_threads){
@@ -40,20 +39,21 @@ void mat_apply_parallel_impl(Matrix *A, float (*func)(float), int n_threads){
     }
 
     int rows, chunk;
-    pthread_t threads[n_threads];
     ApplyTask tasks[n_threads];
+    void *args[n_threads];
 
     rows = A->rows;
     chunk = rows / n_threads;
 
-    for(int t=0; t < n_threads; t++){
+    for(int t = 0; t < n_threads; t++){
         tasks[t].A = A;
         tasks[t].func = func;
         tasks[t].start_row = chunk * t;
-        tasks[t].end_row = (t == n_threads - 1) ? rows : chunk * (t+1);
-
-        pthread_create(&threads[t], NULL, worker, &tasks[t]);
+        tasks[t].end_row = (t == n_threads - 1) ? rows : chunk * (t + 1);
+        args[t] = &tasks[t];
     }
 
-    for(int t = 0; t < n_threads; t++) pthread_join(threads[t], NULL);
+    const RuntimeConfig *cfg = runtime_get();
+    thread_pool_submit(cfg->pool, worker, args, n_threads);
+    thread_pool_wait(cfg->pool);
 }

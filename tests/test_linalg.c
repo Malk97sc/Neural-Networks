@@ -4,6 +4,7 @@
 
 #include "matrix.h"
 #include "linalg.h"
+#include "runtime.h"
 
 #define EPS 1e-5f
 
@@ -17,6 +18,8 @@ void test_bias();
 void test_apply();
 
 int main(){
+    runtime_init(4);
+
     printf("Running tests...\n");
 
     test_vec_ops();
@@ -28,6 +31,7 @@ int main(){
 
     printf("All tests passed.\n");
 
+    runtime_destroy();
     return 0;
 }
 
