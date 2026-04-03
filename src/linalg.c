@@ -41,7 +41,6 @@ void matvec(const Matrix *A, const float *x, float *y){
     assert(A->cols >= 0 && A->rows >= 0);
 
     if(should_parallelize_matvec(A->rows, A->cols)){
-        printf("[matvec] parallel path\n");
         const RuntimeConfig *cfg = runtime_get();
         matvec_parallel_impl(A, x, y, cfg->n_threads);
         return;
@@ -65,7 +64,6 @@ void matmul(const Matrix *A, const Matrix *B, Matrix *C){
     assert((A->cols == B->rows) && (C->rows == A->rows) && (C->cols == B->cols));
 
     if(should_parallelize_matmul(A->rows, A->cols, B->cols)){
-        printf("[matmul] parallel path\n");
         const RuntimeConfig *cfg = runtime_get();
         matmul_parallel_impl(A, B, C, cfg->n_threads);
         return;
@@ -82,8 +80,7 @@ void matmul(const Matrix *A, const Matrix *B, Matrix *C){
         for (int j=0; j < colsB; j++){
             sum = 0.0f;
             for (int k=0; k < colsA; k++){
-                sum += A->data[i * A->stride + k] * B->data[k * B->stride + j];
-                //sum += MAT_AT(A, i, k) * MAT_AT(B, k, j);
+                sum += MAT_AT(A, i, k) * MAT_AT(B, k, j);
             }
             C->data[i * C->stride + j] = sum;
         }
