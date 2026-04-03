@@ -6,11 +6,9 @@ The solution is a **persistent thread pool**: workers are created once at startu
 
 ## Proposed Changes
 
----
-
 ### Thread Pool Core
 
-#### [NEW] [thread_pool.h](file:///home/dexx/SharedDisk/Programming/NN-project/include/thread_pool.h)
+#### [NEW] [thread_pool.h]
 
 Minimal public API:
 
@@ -28,7 +26,7 @@ void        thread_pool_destroy(ThreadPool *pool);
 - `thread_pool_submit`: dispatches `n_tasks` work units. Each worker picks an `args[i]` and calls `fn(args[i])`.
 - `thread_pool_wait`: blocks until all submitted tasks are done (internal barrier).
 
-#### [NEW] [thread_pool.c](file:///home/dexx/SharedDisk/Programming/NN-project/src/thread_pool.c)
+#### [NEW] [thread_pool.c]
 
 Internal design:
 
@@ -49,21 +47,17 @@ ThreadPool {
 
 Workers loop: lock mutex -> wait on `work_ready` -> execute assigned task -> increment `n_done` -> signal `work_done` -> repeat.
 
----
-
 ### Runtime Integration
 
-#### [MODIFY] [runtime.h](file:///home/dexx/SharedDisk/Programming/NN-project/include/runtime.h)
+#### [MODIFY] [runtime.h]
 
 - Add `ThreadPool *pool` field to `RuntimeConfig`.
 - Add `void runtime_destroy(void)` declaration.
 
-#### [MODIFY] [runtime.c](file:///home/dexx/SharedDisk/Programming/NN-project/src/runtime.c)
+#### [MODIFY] [runtime.c]
 
 - `runtime_init`: call `thread_pool_create(n_threads)` and store in `config.pool`.
 - `runtime_destroy`: call `thread_pool_destroy(config.pool)`.
-
----
 
 ### Parallel Operations Refactoring
 
@@ -79,52 +73,7 @@ They will be refactored to:
 
 The `worker` functions themselves remain unchanged; only the scheduler changes.
 
-#### [MODIFY] [matvec_parallel.c](file:///home/dexx/SharedDisk/Programming/NN-project/src/parallel/matvec_parallel.c)
-#### [MODIFY] [matmul_parallel.c](file:///home/dexx/SharedDisk/Programming/NN-project/src/parallel/matmul_parallel.c)
-#### [MODIFY] [mat_add_rowwise_parallel.c](file:///home/dexx/SharedDisk/Programming/NN-project/src/parallel/mat_add_rowwise_parallel.c)
-#### [MODIFY] [mat_apply_parallel.c](file:///home/dexx/SharedDisk/Programming/NN-project/src/parallel/mat_apply_parallel.c)
-
 Each file needs access to the pool via `runtime_get()->pool`.
-
----
-
-### Build
-
-#### [MODIFY] [Makefile](file:///home/dexx/SharedDisk/Programming/NN-project/Makefile)
-
-Add `src/thread_pool.c` to the `SRC` variable so it compiles and links automatically.
-
----
-
-### Tests Cleanup
-
-#### [MODIFY] test files that call `runtime_init`
-
-Add `runtime_destroy()` at the end of `main` in `test_runtime.c` and `test_performance.c` to properly shut down the pool and allow Valgrind to confirm 0 leaks.
-
----
-
-## Verification Plan
-
-### Automated Tests
-
-```bash
-# Compile everything
-make clean && make test
-
-# Correctness: all unit tests must still pass
-./build/test_linalg
-./build/test_linalg_parallel
-./build/test_matrix
-./build/test_runtime
-
-# Performance: speedup should now be measurable
-./build/test_performance
-
-# Memory: must report 0 errors and 0 leaks
-./run_valgrind.sh test_runtime
-./run_valgrind.sh test_linalg
-```
 
 ### Expected Results
 - All `assert` tests pass without modification.
