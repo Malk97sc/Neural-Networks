@@ -150,3 +150,29 @@ void mat_apply(Matrix *A, float (*func)(float)){
 void mat_apply_parallel(Matrix *A, float (*func)(float), int n_threads){
     mat_apply_parallel_impl(A, func, n_threads);
 }
+
+void mat_apply_binary(Matrix *A, const Matrix *B, float (*func)(float, float)){
+    assert(A && B && func);
+    assert(A->rows == B->rows && A->cols == B->cols);
+
+    if(should_parallelize_elementwise(A->rows * A->cols)){
+        const RuntimeConfig *cfg = runtime_get();
+        mat_apply_binary_parallel_impl(A, B, func, cfg->n_threads);
+        return;
+    }
+
+    float *rowA = NULL;
+    const float *rowB = NULL;
+
+    for(int i=0; i < A->rows; i++){
+        rowA = &A->data[i * A->stride];
+        rowB = &B->data[i * B->stride];
+        for(int j=0; j < A->cols; j++){
+            rowA[j] = func(rowA[j], rowB[j]);
+        }
+    }
+}
+
+void mat_apply_binary_parallel(Matrix *A, const Matrix *B, float (*func)(float, float), int n_threads){
+    mat_apply_binary_parallel_impl(A, B, func, n_threads);
+}

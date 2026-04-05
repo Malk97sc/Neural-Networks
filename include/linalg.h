@@ -27,4 +27,7 @@ void mat_add_rowwise_parallel(Matrix *A, const float *b, int n_threads);
 void mat_apply(Matrix *A, float (*func)(float));
 void mat_apply_parallel(Matrix *A, float (*func)(float), int n_threads);
 
+void mat_apply_binary(Matrix *A, const Matrix *B, float (*func)(float, float));
+void mat_apply_binary_parallel(Matrix *A, const Matrix *B, float (*func)(float, float), int n_threads);
+
 #endif
