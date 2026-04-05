@@ -6,11 +6,11 @@
 #include "linalg.h"
 #include "parallel.h"
 #include "runtime.h"
+#include "activations.h"
 
 #define EPS 1e-5f
 
 int float_eq(float a, float b);
-float relu(float x);
 void test_matvec_parallel();
 void test_matmul_parallel();
 void test_bias_parallel();
@@ -34,10 +34,6 @@ int main(){
 
 int float_eq(float a, float b){
     return fabsf(a - b) < EPS;
-}
-
-float relu(float x){
-    return x > 0 ? x : 0;
 }
 
 void test_matvec_parallel(){

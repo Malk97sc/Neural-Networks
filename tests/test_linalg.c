@@ -5,10 +5,10 @@
 #include "matrix.h"
 #include "linalg.h"
 #include "runtime.h"
+#include "activations.h"
 
 #define EPS 1e-5f
 
-float relu(float x);
 int float_eq(float a, float b);
 void test_vec_ops();
 void test_matvec();
@@ -33,10 +33,6 @@ int main(){
 
     runtime_destroy();
     return 0;
-}
-
-float relu(float x){
-    return x > 0 ? x : 0;
 }
 
 int float_eq(float a, float b){
