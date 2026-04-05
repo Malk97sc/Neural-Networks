@@ -32,9 +32,9 @@ memory layout, numerical computation, and parallel execution.
 - [x] Speedup benchmarking (Sequential vs Parallel tool)
 
 ### Phase 3: NN Infrastructure
-- [ ] Activation functions & Derivatives
-- [ ] Loss functions
-- [ ] Weight Initialization (Xavier/He)
+- [x] Activation functions & Derivatives
+- [x] Loss functions
+- [x] Weight Initialization (Xavier/He)
 
 ### Phase 4: SLP (Single Layer Perceptron)
 - [ ] 4.1 Forward: `y = activation(Wx + b)`
@@ -94,17 +94,15 @@ Neural-Networks-in-C
 │   ├── parallel.h
 │   ├── linalg.h
 │   ├── runtime.h
-│   └── thread_pool.h
+│   ├── thread_pool.h
+│   └── nn_infra.h
 ├── src/
 │   ├── parallel/
-│   │   ├── mat_add_rowwise_parallel.c
-│   │   ├── mat_apply_parallel.c
-│   │   ├── matmul_parallel.c
-│   │   └── matvec_parallel.c
 │   ├── matrix.c
 │   ├── linalg.c
 │   ├── runtime.c
-│   └── thread_pool.c
+│   ├── thread_pool.c
+│   └── nn_infra.c
 ├── tests/
 │   └── test_*.c
 ├── build/ # compiled binaries
