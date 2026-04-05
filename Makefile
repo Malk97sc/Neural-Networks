@@ -1,5 +1,5 @@
-CC = gcc
 CFLAGS = -Wall -Wextra -O2 -Iinclude -pthread -g
+LDLIBS = -lm -lpthread
 
 SRC_DIR = src
 PAR_DIR = src/parallel
@@ -17,12 +17,12 @@ APP = $(BUILD_DIR)/app
 all: $(APP)
 
 $(APP): $(OBJ) main.c | $(BUILD_DIR)
-	$(CC) $(CFLAGS) $^ -o $@
+	$(CC) $(CFLAGS) $^ $(LDLIBS) -o $@
 
 test: $(TEST_BINS)
 
 $(BUILD_DIR)/%: $(TEST_DIR)/%.c $(OBJ) | $(BUILD_DIR)
-	$(CC) $(CFLAGS) $^ -o $@
+	$(CC) $(CFLAGS) $^ $(LDLIBS) -o $@
 
 $(SRC_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
