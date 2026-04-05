@@ -4,8 +4,10 @@
 #include "matrix.h"
 
 typedef enum {
-    INIT_XAVIER,
-    INIT_HE
+    INIT_XAVIER, //normal
+    INIT_XAVIER_UNIFORM, //uniform
+    INIT_HE, //normal
+    INIT_HE_UNIFORM //uniform
 } InitMethod;
 
 void set_seed(unsigned int seed);
