@@ -3,10 +3,11 @@ LDLIBS = -lm -lpthread
 
 SRC_DIR = src
 PAR_DIR = src/parallel
+SLP_DIR = src/slp
 BUILD_DIR = build
 TEST_DIR = tests
 
-SRC = $(wildcard $(SRC_DIR)/*.c) $(wildcard $(PAR_DIR)/*.c)
+SRC = $(wildcard $(SRC_DIR)/*.c) $(wildcard $(PAR_DIR)/*.c) $(wildcard $(SLP_DIR)/*.c)
 OBJ = $(SRC:.c=.o)
 
 TEST_SRC = $(wildcard $(TEST_DIR)/*.c)
@@ -30,6 +31,9 @@ $(SRC_DIR)/%.o: $(SRC_DIR)/%.c
 $(PAR_DIR)/%.o: $(PAR_DIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
+$(SLP_DIR)/%.o: $(SLP_DIR)/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
@@ -37,5 +41,6 @@ clean:
 	rm -rf $(BUILD_DIR)
 	rm -f $(SRC_DIR)/*.o
 	rm -f $(PAR_DIR)/*.o
+	rm -f $(SLP_DIR)/*.o
 
 .PHONY: all test clean
