@@ -3,6 +3,8 @@
 
 #include "thread_pool.h"
 
+#define MIN_THREADS 2
+
 typedef struct {
     int n_threads;
     int matvec_threshold;

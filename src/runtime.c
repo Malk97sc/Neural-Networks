@@ -5,7 +5,7 @@
 static RuntimeConfig config;
 
 void runtime_init(int n_threads){
-    config.n_threads = n_threads;
+    config.n_threads = n_threads < MIN_THREADS ? MIN_THREADS : n_threads;
 
     //main thresholds
     config.matvec_threshold = 200000;  // rows * cols
@@ -28,15 +28,15 @@ const RuntimeConfig* runtime_get(void){
 }
 
 int should_parallelize_matvec(int rows, int cols){
-    return (rows * cols) >= config.matvec_threshold;
+    return (rows * cols >= config.matvec_threshold) && (rows >= config.n_threads);
 }
 
 int should_parallelize_matmul(int m, int n, int p){
-    return (m * n * p) >= config.matmul_threshold;
+    return (m * n * p >= config.matmul_threshold) && (m >= config.n_threads);
 }
 
 int should_parallelize_elementwise_add(int rows, int cols){
-    return (rows * cols) >= config.elementwise_add_threshold;
+    return (rows * cols >= config.elementwise_add_threshold) && (rows >= config.n_threads);
 }
 
 int should_parallelize_elementwise(int size){
