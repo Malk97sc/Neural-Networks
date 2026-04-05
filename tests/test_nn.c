@@ -65,9 +65,11 @@ void test_loss_grad(){
 
 void test_initialization(){
     printf("\n--- Testing Initialization ---\n");
-    Matrix w = mat_alloc(100, 100);
+    Matrix w = mat_alloc(200, 200); 
+    
+    //Xavier Normal
     set_seed(42);
-    mat_init_weights(&w, INIT_XAVIER, 100, 100);
+    mat_init_weights(&w, INIT_XAVIER, 200, 200);
     
     float sum = 0, sq_sum = 0;
     int n = w.rows * w.cols;
@@ -77,7 +79,20 @@ void test_initialization(){
     }
     float mean = sum / n;
     float var = (sq_sum / n) - (mean * mean);
-    printf("Xavier (100,100) -> Mean: %f, Var: %f (Expected ~0.01)\n", mean, var);
+    printf("Xavier Normal (200x200) -> Mean: %f, Var: %f (Expected ~0.005)\n", mean, var);
+
+    //Xavier Uniform
+    set_seed(42);
+    mat_init_weights(&w, INIT_XAVIER_UNIFORM, 200, 200);
+    
+    sum = 0; sq_sum = 0;
+    for(int i=0; i<n; i++) {
+        sum += w.data[i];
+        sq_sum += w.data[i] * w.data[i];
+    }
+    mean = sum / n;
+    var = (sq_sum / n) - (mean * mean);
+    printf("Xavier Uniform (200x200) -> Mean: %f, Var: %f (Expected ~0.005)\n", mean, var);
     
     mat_free(&w);
 }
